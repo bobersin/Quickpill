@@ -1,0 +1,24 @@
+{
+    "current": "color1",
+
+    "themes": {
+        "tmp": {
+            "colors": {
+                "background": "black",
+                "accent": "purple",
+                "highlightDark": "green",
+                "highlightLight": "lime",
+                "border": "blue"
+            }
+        },
+        "color1": {
+            "colors": {
+                "background": "#101219",
+                "accent": "#fdf0de",
+                "highlightDark": "#29254c",
+                "highlightLight": "#ed7b50",
+                "border": "#3b277e"
+            }
+        }
+    }
+}

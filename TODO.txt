@@ -1,0 +1,29 @@
+1: Finish music player {
+    1.4: Dont spin when rewind and not playing
+    1.5: add lyrics
+    1.6: dont yell when app closes
+    1.7: add loop functionality
+    1.8: make it noticable when a button is pressed
+    1.91: add velocity on rewind
+    1.92: add speed up on rewind instead of setting
+    1.95: auto select corrent music track
+    1.96: dont play animation for switch if theres only one
+    1.97: fix play bar going to max when spotify first opens
+    1.98: wrap title if too long
+    1.99: add spacebar
+}
+2: Finish app launcher {
+    2.1: make it wrap when not = 8
+}
+3: make admin password prompt
+4: make logout/lock panel
+5: add theme switcher
+6: add notification manager
+7: add sound/brightness changer
+8: add system tray
+9: add settings
+10: add fullscreen
+11: Make task manager, inspo --> https://www.reddit.com/r/unixporn/comments/8v9r19/oc_ive_just_created_a_program_for_drawing_process/
+
+
+Diffrent Project: make TS https://www.reddit.com/r/unixporn/comments/hgba3b/i3_razer_blade_stealth_highlighting_shortcuts_and/
