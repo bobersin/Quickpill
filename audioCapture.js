@@ -13,17 +13,20 @@ let defaultSink = execSync(
 )
 	.toString()
 	.match(/\d+/g)[0];
-const size = 2048;
+const size = 1024;
 const fft = new FFT(size);
 const recorder = spawn("pw-record", [
-	"-a",
-	"--channels",
-	"1",
-	"--target",
-	defaultSink,
-	"--latency",
-	"20ms",
-	"-",
+    "--format",
+    "s16",
+    "--rate",
+    "48000",
+    "--channels",
+    "1",
+    "--target",
+    defaultSink,
+    "--latency",
+    "20ms",
+    "-",
 ]);
 const bands = Array.from(
 	{ length: numBands },
@@ -42,33 +45,51 @@ function sendDisplay(display) {
 	console.log(JSON.stringify(display.map((v) => Math.log(v + 1))));
 }
 
+let pending = Buffer.alloc(0);
 const input = new Float32Array(size);
 const output = fft.createComplexArray();
 recorder.stdout.on("data", (chunk) => {
-	const samples = new Int16Array(
-		chunk.buffer,
-		chunk.byteOffset,
-		chunk.byteLength / 2,
-	);
-	for (let i = 0; i < input.length; i++) input[i] = samples[i] / 32768;
+    pending = Buffer.concat([pending, chunk]);
 
-	fft.realTransform(output, input);
+    const bytesNeeded = size * 2;
 
-	const final = new Float32Array(size / 2);
+    while (pending.length >= bytesNeeded) {
+        const frame = pending.subarray(0, bytesNeeded);
+        pending = pending.subarray(bytesNeeded);
 
-	for (let i = 0; i < size; i += 2) {
-		final[i / 2] = Math.sqrt(
-			output[i] * output[i] + output[i + 1] * output[i + 1],
-		);
-	}
+        const samples = new Int16Array(
+            frame.buffer,
+            frame.byteOffset,
+            size,
+        );
 
-	const display = bins.map((upper, i) => {
-		const lower = i === 0 ? 0 : bins[i - 1];
-		const slice = final.slice(lower, upper);
+        for (let i = 0; i < size; i++) {
+            input[i] = samples[i] / 32768;
+        }
 
-		if (slice.length === 0) return 0;
+        fft.realTransform(output, input);
 
-		return Math.sqrt(slice.reduce((sum, v) => sum + v * v, 0) / slice.length);
-	});
-	sendDisplay(display);
+        const final = new Float32Array(size / 2);
+
+        for (let i = 0; i < size; i += 2) {
+            final[i / 2] = Math.sqrt(
+                output[i] * output[i] +
+                output[i + 1] * output[i + 1],
+            );
+        }
+
+        const display = bins.map((upper, i) => {
+            const lower = i === 0 ? 0 : bins[i - 1];
+            const slice = final.slice(lower, upper);
+
+            if (slice.length === 0) return 0;
+
+            return Math.sqrt(
+                slice.reduce((sum, v) => sum + v * v, 0) /
+                slice.length,
+            );
+        });
+
+        sendDisplay(display);
+    }
 });
