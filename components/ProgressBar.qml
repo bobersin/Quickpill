@@ -1,13 +1,19 @@
+import QtQuick
 Item {
     id: root
 
     property real progress: 0
     property real length: 100
+    width: 100
+    height: 4
+
+    signal released(point mouse, real startPos, real endPos)
+    signal pressed(point mouse, real startPos, real endPos)
 
     Rectangle {
         id: backgroundBar
-        width: 100
-        height: 4
+        width: parent.width
+        height: parent.height
         radius: height / 2
 
         MouseArea {
@@ -23,11 +29,19 @@ Item {
             onPressed: {
                 followProgress.running = false;
                 followMouse.running = true;
+                root.pressed(
+                    Qt.point(selectionArea.mouseX, selectionArea.mouseY),
+                    selectionArea.startPos,
+                    selectionArea.endPos
+                )
             }
             onReleased: {
-                setFollowProgress.start();
                 followMouse.running = false;
-                function
+                root.released(
+                    Qt.point(selectionArea.mouseX, selectionArea.mouseY),
+                    selectionArea.startPos,
+                    selectionArea.endPos
+                )
             }
 
             FrameAnimation {
@@ -43,21 +57,10 @@ Item {
 
                 running: true
                 onTriggered: {
-                    handle.x = Math.min(Math.max(selectionArea.startPos, progressBar.progress / progressBar.length * selectionArea.width), selectionArea.endPos) - handle.width;
+                    handle.x = Math.min(Math.max(selectionArea.startPos, progress / length * width), selectionArea.endPos) - handle.width;
                 }
             }
 
-        }
-
-        FrameAnimation {
-            id: setFollowProgress
-
-            running: true
-            onTriggered: {
-                if (Mpris.players.values[playerNum]?.position === (Math.min(Math.max(selectionArea.startPos, selectionArea.mouseX), selectionArea.endPos) - 8) / 312 * progressBar.length)
-                    followProgress.running = true;
-
-            }
         }
 
         Rectangle {
@@ -70,11 +73,6 @@ Item {
             z: 1
             radius: height / 2
             color: curColor.border
-        }
-
-        FrameAnimation {
-            running: true
-            onTriggered: progressBar.progress = Mpris.players.values[playerNum]?.position ?? 0
         }
 
     }

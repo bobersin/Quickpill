@@ -346,7 +346,24 @@ Item {
         fadeInDuration: 250
     }
 
-    
+    ProgressBar {
+        id: progressBar
+        opacity: 0
+        progress: Mpris.players.values[playerNum]?.position ?? 0
+        length: Mpris.players.values[playerNum]?.length ?? 0
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: (parent.height - (artCover.y + artCover.height)) / 2
+        width: background.width - 100
+        FrameAnimation {
+            running: true
+            onTriggered: progressBar.progress = Mpris.players.values[playerNum]?.position ?? 0
+        }
+        onReleased: function(mouse, startPos, endPos) {
+            if (Mpris.players.values[playerNum])
+                Mpris.players.values[playerNum].position = (Math.min(Math.max(startPos, mouse.x), endPos) - 8) / 312 * length
+        }
+    }
 
     Item {
         id: discription
