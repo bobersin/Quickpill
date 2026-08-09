@@ -63,7 +63,7 @@ PanelWindow {
         property int minHeight: 60
         property int maxWidth: 450
         property int minWidth: 150
-        property bool hoverOveride: false
+        property bool moduleLocker: false
         property int lockedWidth: -1
         property int lockedHeight: -1
 
@@ -100,6 +100,10 @@ PanelWindow {
             id: hoverHandler
         }
 
+        VolumeChanger {
+            id: volumeChanger
+        }
+
 
 
         CornerConnector {
@@ -123,10 +127,12 @@ PanelWindow {
                 duration: 250
                 easing.type: Easing.InOutCirc
                 onRunningChanged: {
-                    if (!running && hoverHandler.hovered && !background.hoverOveride) {
+                    if (!running && hoverHandler.hovered && !background.moduleLocker) {
                         musicPlayer.start()
+                        volumeChanger.start()
                     } else if (running && !hoverHandler.hovered) {
                         musicPlayer.exit()
+                        volumeChanger.exit()
                     }
                 }
             }

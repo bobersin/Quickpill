@@ -19,7 +19,7 @@ ClippingRectangle {
     property int curMaxItems: Math.min(maxItems, sortedList.length)
 
     function start() {
-        background.hoverOveride = true;
+        background.moduleLocker = true;
         background.lockedWidth = 400;
         background.lockedHeight = windowHeight;
         background.focusGrab.active = true;
@@ -30,7 +30,7 @@ ClippingRectangle {
     }
 
     function exit() {
-        background.hoverOveride = false;
+        background.moduleLocker = false;
         background.lockedWidth = -1;
         background.lockedHeight = -1;
         background.focusGrab.active = false;
@@ -117,6 +117,14 @@ ClippingRectangle {
                     text: curItem.name
                     font.pixelSize: 16
                     anchors.centerIn: parent
+                }
+
+                Image {
+                    source: "image://icon/" + curItem.icon
+                    x: radius
+                    height: parent.height - 4
+                    y: 2
+                    width: height
                 }
 
                 MouseArea {

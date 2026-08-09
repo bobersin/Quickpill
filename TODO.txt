@@ -1,4 +1,5 @@
 1: Finish music player {
+    1.3: add volume controls
     1.4: Dont spin when rewind and not playing
     1.5: add lyrics
     1.6: dont yell when app closes
