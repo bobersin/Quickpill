@@ -13,13 +13,13 @@
     1.98: wrap title if too long
     1.99: add spacebar
 }
-2: Finish app launcher {
-    2.1: make it wrap when not = 8
+2: App launcher {
 }
 3: make admin password prompt
 4: make logout/lock panel
 5: add theme switcher
-6: add notification manager
+6: Notification Manager {
+}
 7: add sound/brightness changer
 8: add system tray
 9: add settings

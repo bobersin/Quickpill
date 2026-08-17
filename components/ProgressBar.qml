@@ -2,8 +2,10 @@ import QtQuick
 Item {
     id: root
 
-    property real progress: 0
+    property real progress: 50
     property real length: 100
+    property bool followMouseProgress: false
+
     width: 100
     height: 4
 
@@ -12,8 +14,7 @@ Item {
 
     Rectangle {
         id: backgroundBar
-        width: parent.width
-        height: parent.height
+        anchors.fill: parent
         radius: height / 2
 
         MouseArea {
@@ -37,6 +38,7 @@ Item {
             }
             onReleased: {
                 followMouse.running = false;
+                progress = ((Math.min(Math.max(selectionArea.startPos, selectionArea.mouseX), selectionArea.endPos) - selectionArea.startPos) / (selectionArea.endPos - selectionArea.startPos)) * length
                 root.released(
                     Qt.point(selectionArea.mouseX, selectionArea.mouseY),
                     selectionArea.startPos,
@@ -48,7 +50,9 @@ Item {
                 id: followMouse
 
                 onTriggered: {
-                    handle.x = Math.min(Math.max(selectionArea.startPos, selectionArea.mouseX), selectionArea.endPos) - handle.width;
+                    handle.x = (Math.min(Math.max(selectionArea.startPos, selectionArea.mouseX), selectionArea.endPos)) - handle.width;
+                    if (followMouseProgress)
+                        progress = ((Math.min(Math.max(selectionArea.startPos, selectionArea.mouseX), selectionArea.endPos) - selectionArea.startPos) / (selectionArea.endPos - selectionArea.startPos)) * length
                 }
             }
 
@@ -57,7 +61,7 @@ Item {
 
                 running: true
                 onTriggered: {
-                    handle.x = Math.min(Math.max(selectionArea.startPos, progress / length * width), selectionArea.endPos) - handle.width;
+                    handle.x = ((progress / length) * root.width) - 8
                 }
             }
 

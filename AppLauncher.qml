@@ -18,32 +18,27 @@ ClippingRectangle {
     property var sortedList: fuse.search(userInput.text)
     property int curMaxItems: Math.min(maxItems, sortedList.length)
 
-    function start() {
+    Component.onCompleted: {
         background.moduleLocker = true;
         background.lockedWidth = 400;
         background.lockedHeight = windowHeight;
         background.focusGrab.active = true;
-        musicPlayer.fadeOutAnimation.restart();
         userInput.forceActiveFocus();
         clock.enabled = false;
-        enabled = true;
     }
 
-    function exit() {
+    Component.onDestruction: {
         background.moduleLocker = false;
         background.lockedWidth = -1;
         background.lockedHeight = -1;
         background.focusGrab.active = false;
-        userInput.clear();
-        selectionIndex = 0;
         clock.enabled = true;
-        enabled = false;
     }
 
-    enabled: false
-    opacity: enabled ? 1 : 0
-    anchors.fill: background
+    signal exited
+
     color: "transparent"
+    anchors.fill: appLauncherLoader
     onWindowHeightChanged: {
         if (enabled)
             background.lockedHeight = windowHeight;
@@ -62,8 +57,8 @@ ClippingRectangle {
         id: userInput
 
         opacity: 1
-        anchors.left: parent.left
         anchors.right: parent.right
+        anchors.left: parent.left
         anchors.leftMargin: 50
         anchors.rightMargin: 50
         anchors.top: parent.top
@@ -73,14 +68,14 @@ ClippingRectangle {
         color: "white"
         placeholderText: "Search . . ."
         placeholderTextColor: curColor.highlightDark
-        Keys.onEscapePressed: exit()
+        Keys.onEscapePressed: root.exited()
         Keys.onDownPressed: selectionIndex++
         Keys.onTabPressed: selectionIndex++
         Keys.onBacktabPressed: selectionIndex--
         Keys.onUpPressed: selectionIndex--
         onAccepted: {
             sortedList[selectionIndex].item.execute();
-            root.exit();
+            root.exited();
         }
 
         background: Rectangle {
@@ -132,7 +127,7 @@ ClippingRectangle {
                     hoverEnabled: true
                     onClicked: {
                         curItem.execute();
-                        root.exit();
+                        root.exited();
                     }
                     onPositionChanged: {
                         selectionIndex = index;

@@ -13,7 +13,9 @@ Item {
     property int playerNum: 0
     property bool backgroundHovered: parent.hoverOveride ? false : hoverHandler.hovered
 
-    function start() {
+    signal exited
+
+    Component.onCompleted: {
         fadeInAnimation.restart();
         for (let i = 0; i < Mpris.players.values.length; i++) {
             if (Mpris.players.values[i].isPlaying) {
@@ -22,21 +24,15 @@ Item {
             }
         }
         vinylImage.source = Mpris.players.values[playerNum]?.trackArtUrl ?? "icons/black.png"
-        vinylImage.rotationSpeed = Mpris.players.values[playerNum].isPlaying ? 0.5 : 0
-        enabled = true
-    }
-
-    function exit() {
-        fadeOutAnimation.restart();
-        enabled = false
-    }
-
-    anchors.fill: parent
-
-    Component.onCompleted: {
+        vinylImage.rotationSpeed = Mpris.players.values[playerNum]?.isPlaying ? 0.5 : 0
+        //enabled = true
         if (Mpris.players.values[playerNum])
             vinylImage.source = Mpris.players.values[playerNum]?.trackArtUrl;
     }
+
+    function exit() {fadeOutAnimation.restart()}
+
+    anchors.fill: parent
 
     WrapperItem {
         id: artCover
@@ -475,6 +471,7 @@ Item {
             duration: 135
         }
         onStopped: controlButtons.list.forEach(button => button.fadeOut.stop())
+        onFinished: exited()
     }
     
 }

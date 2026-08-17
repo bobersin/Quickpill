@@ -7,6 +7,7 @@ import Quickshell.Wayland
 import Quickshell.Io
 import Qt5Compat.GraphicalEffects
 import Quickshell.Services.Notifications
+import Quickshell.Widgets
 import "components"
 
 PanelWindow {
@@ -19,7 +20,7 @@ PanelWindow {
     //WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     color: "transparent"
-    mask: Region {item: background}
+    mask: Region {item: backgroundInteraction}
     anchors {
         top: true
         left: true
@@ -58,6 +59,7 @@ PanelWindow {
         property var focusGrab: HyprlandFocusGrab {
             windows: [ root ]
         }
+
         property var root: root
         property int maxHeight: 450
         property int minHeight: 60
@@ -66,9 +68,12 @@ PanelWindow {
         property bool moduleLocker: false
         property int lockedWidth: -1
         property int lockedHeight: -1
+        property int leftExpansion: 0
+        property int rightExpansion: 0
+        property int topExpansion: 0
 
         color: curColor.background
-        anchors.horizontalCenter: parent.horizontalCenter
+        x: (root.width - width)/2
         height: lockedHeight != -1 ? lockedHeight : hoverHandler.hovered ? maxHeight : minHeight
         width: lockedWidth != -1 ? lockedWidth : hoverHandler.hovered ? maxWidth - root.radius * 2 : minWidth - root.radius * 2
         bottomLeftRadius: root.radius
@@ -77,27 +82,41 @@ PanelWindow {
             id: clock
             z: 1
         }
-
-        MusicPlayer {
-            id: musicPlayer
+        
+        Loader {
+            anchors.fill: parent
+            id: musicPlayerLoader
+            active: false
+            source: "MusicPlayer.qml"
             z: 1
-        }
+            Connections {
+                target: musicPlayerLoader.item
 
-        AppLauncher {
-            id: appLauncher
+                function onExited() {
+                    musicPlayerLoader.active = false
+                }
+            }
+        }
+        Loader {
+            id: appLauncherLoader
+            anchors.fill: background
+            active: false
+            source: "AppLauncher.qml"
             z: 1
-        }
+            Connections {
+                target: appLauncherLoader.item
 
+                function onExited() {
+                    appLauncherLoader.active = false
+                }
+            }
+        }
         MusicIndicator {
             id: musicIndicator
         }
 
         NotificationManager {
             id: notificationManager
-        }
-
-        HoverHandler {
-            id: hoverHandler
         }
 
         VolumeChanger {
@@ -128,10 +147,11 @@ PanelWindow {
                 easing.type: Easing.InOutCirc
                 onRunningChanged: {
                     if (!running && hoverHandler.hovered && !background.moduleLocker) {
-                        musicPlayer.start()
+                        musicPlayerLoader.active = true
                         volumeChanger.start()
                     } else if (running && !hoverHandler.hovered) {
-                        musicPlayer.exit()
+                        if (musicPlayerLoader.item)
+                            musicPlayerLoader.item.exit()
                         volumeChanger.exit()
                     }
                 }
@@ -146,6 +166,18 @@ PanelWindow {
         }
 
     }
+
+    Item {
+        anchors.top: background.top
+        id: backgroundInteraction
+        x: background.x
+        y: background.y
+        width: background.width + background.leftExpansion + background.rightExpansion
+        height: background.height + background.topExpansion
+        HoverHandler {
+            id: hoverHandler
+        }
+    }
     NotificationServer {
         onNotification: function(notification) {
             notificationManager.start(notification)
@@ -156,7 +188,9 @@ PanelWindow {
         target: "background"
 
         function appLauncher(): void {
-            appLauncher.start()
+            appLauncherLoader.active = true
+            if (musicPlayerLoader.item)
+                musicPlayerLoader.item.exit()
             console.log("app launcher opened")
         }
     }
